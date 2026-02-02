@@ -246,7 +246,9 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
             return;
           }
 
-          const area = (record.area || "dining") as "zomato" | "swiggy" | "dining" | "parcel";
+          // Normalize area to lowercase (handles cases where area might be stored as "Zomato" or "ZOMATO")
+          const rawArea = record.area || "dining";
+          const area = (rawArea.toLowerCase()) as "zomato" | "swiggy" | "dining" | "parcel";
           const quantity = record.quantity || 0;
           const restaurantName = record.restaurant || "Unknown";
 
