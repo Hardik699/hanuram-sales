@@ -101,6 +101,7 @@ export function createServer() {
   app.post("/api/items/categories", handleAddCategory);
   app.post("/api/items/hsn-codes", handleAddHsnCode);
   app.post("/api/items/variation-values", handleAddVariationValue);
+  app.post("/api/items/migrate/add-gs1", handleAddGS1Channel);
   app.get("/api/items", handleGetItems);
   app.get("/api/items/:itemId", handleGetItemById);
   app.post("/api/items", handleCreateItem);
