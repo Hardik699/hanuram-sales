@@ -2,8 +2,18 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
-import { handleUpload, handleGetUploads, handleUpdateUpload, handleGetData, handleValidateUpload } from "./routes/upload";
-import { handleDebugItemSales, handleUpdateItemShortCode } from "./routes/debug";
+import {
+  handleUpload,
+  handleGetUploads,
+  handleUpdateUpload,
+  handleGetData,
+  handleValidateUpload,
+} from "./routes/upload";
+import {
+  handleDebugItemSales,
+  handleUpdateItemShortCode,
+  handleDebugSalesHistory,
+} from "./routes/debug";
 import {
   handleGetAllSapCodes,
   handleGetItemsWithSapCodes,
@@ -11,8 +21,14 @@ import {
   handleBatchSetSapCodes,
   handleMatchSapCodes,
 } from "./routes/sap-matching";
-import { handleSapDebugInfo, handleDebugSalesForItem } from "./routes/sap-debug";
-import { handleViewPetpooja, handleSearchSapCode } from "./routes/view-petpooja";
+import {
+  handleSapDebugInfo,
+  handleDebugSalesForItem,
+} from "./routes/sap-debug";
+import {
+  handleViewPetpooja,
+  handleSearchSapCode,
+} from "./routes/view-petpooja";
 import { handleCheckAllData, handleShowSampleRows } from "./routes/check-data";
 import {
   handleGetItems,
@@ -25,6 +41,7 @@ import {
   handleAddCategory,
   handleAddHsnCode,
   handleAddVariationValue,
+  handleAddGS1Channel,
 } from "./routes/items";
 import {
   handleGetSales,
@@ -35,6 +52,7 @@ import {
   handleGetDailySales,
   handleGetRestaurants,
   handleResetItemSales,
+  handleDebugItemSalesRaw,
 } from "./routes/sales";
 
 export function createServer() {
@@ -59,6 +77,7 @@ export function createServer() {
 
   // Debug endpoints
   app.get("/api/debug/item-sales", handleDebugItemSales);
+  app.get("/api/debug/sales-history", handleDebugSalesHistory);
   app.post("/api/debug/update-shortcode", handleUpdateItemShortCode);
 
   // SAP Code matching endpoints
@@ -99,6 +118,7 @@ export function createServer() {
   app.post("/api/items/categories", handleAddCategory);
   app.post("/api/items/hsn-codes", handleAddHsnCode);
   app.post("/api/items/variation-values", handleAddVariationValue);
+  app.post("/api/items/migrate/add-gs1", handleAddGS1Channel);
   app.get("/api/items", handleGetItems);
   app.get("/api/items/:itemId", handleGetItemById);
   app.post("/api/items", handleCreateItem);
@@ -106,6 +126,7 @@ export function createServer() {
   app.delete("/api/items/:itemId", handleDeleteItem);
 
   // Sales routes
+  app.get("/api/sales/debug-raw", handleDebugItemSalesRaw);
   app.get("/api/sales", handleGetSales);
   app.get("/api/sales/restaurants", handleGetRestaurants);
   app.get("/api/sales/summary", handleGetSalesSummary);
@@ -116,10 +137,19 @@ export function createServer() {
   app.post("/api/sales", handleRecordSale);
 
   // Error handling middleware
-  app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    console.error("Server error:", err);
-    res.status(500).json({ error: "Internal server error", message: err?.message });
-  });
+  app.use(
+    (
+      err: any,
+      _req: express.Request,
+      res: express.Response,
+      _next: express.NextFunction,
+    ) => {
+      console.error("Server error:", err);
+      res
+        .status(500)
+        .json({ error: "Internal server error", message: err?.message });
+    },
+  );
 
   return app;
 }

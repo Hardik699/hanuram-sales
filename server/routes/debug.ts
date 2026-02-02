@@ -1,7 +1,8 @@
 import { RequestHandler } from "express";
 import { MongoClient, Db } from "mongodb";
 
-const MONGODB_URI = "mongodb+srv://admin:admin1@cluster0.a3duo.mongodb.net/?appName=Cluster0";
+const MONGODB_URI =
+  "mongodb+srv://admin:admin1@cluster0.a3duo.mongodb.net/?appName=Cluster0";
 
 let cachedDb: Db | null = null;
 
@@ -58,7 +59,7 @@ export const handleDebugItemSales: RequestHandler = async (req, res) => {
       const dataRows = doc.data.slice(1);
 
       const sapCodeIdx = headers.findIndex(
-        (h) => h.toLowerCase().trim() === "sap_code"
+        (h) => h.toLowerCase().trim() === "sap_code",
       );
 
       if (sapCodeIdx === -1) continue;
@@ -124,16 +125,14 @@ export const handleUpdateItemShortCode: RequestHandler = async (req, res) => {
 
     const result = await itemsCollection.updateOne(
       { itemId },
-      { $set: { shortCode, updatedAt: new Date() } }
+      { $set: { shortCode, updatedAt: new Date() } },
     );
 
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: `Item ${itemId} not found` });
     }
 
-    console.log(
-      `✅ Updated item ${itemId} shortCode to ${shortCode}`
-    );
+    console.log(`✅ Updated item ${itemId} shortCode to ${shortCode}`);
 
     res.json({
       success: true,
@@ -141,6 +140,82 @@ export const handleUpdateItemShortCode: RequestHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Update error:", error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+// Debug endpoint to inspect salesHistory structure for an item
+export const handleDebugSalesHistory: RequestHandler = async (req, res) => {
+  try {
+    const { itemId } = req.query;
+
+    if (!itemId) {
+      return res.status(400).json({ error: "itemId query parameter required" });
+    }
+
+    const db = await getDatabase();
+    const itemsCollection = db.collection("items");
+    const item = await itemsCollection.findOne({ itemId });
+
+    if (!item) {
+      return res.json({
+        success: false,
+        error: `Item ${itemId} not found`,
+      });
+    }
+
+    // Analyze all variations and their salesHistory
+    const variationSummary: any[] = [];
+    const areaDistribution: { [key: string]: number } = {};
+
+    if ((item as any).variations && Array.isArray((item as any).variations)) {
+      (item as any).variations.forEach((variation: any, idx: number) => {
+        const salesHistory = variation.salesHistory || [];
+        const variationName = variation.name || `Variation ${idx + 1}`;
+
+        // Collect area distribution for this variation
+        const areas: { [key: string]: number } = {};
+        salesHistory.forEach((record: any) => {
+          const area = record.area || "NO_AREA_FIELD";
+          areas[area] = (areas[area] || 0) + 1;
+          areaDistribution[area] = (areaDistribution[area] || 0) + 1;
+        });
+
+        // Show sample records
+        const sampleRecords = salesHistory.slice(0, 2).map((r: any) => ({
+          date: r.date,
+          area: r.area || "MISSING",
+          restaurant: r.restaurant,
+          quantity: r.quantity,
+          value: r.value,
+        }));
+
+        variationSummary.push({
+          index: idx,
+          name: variationName,
+          totalRecords: salesHistory.length,
+          areaBreakdown: areas,
+          sampleRecords,
+        });
+      });
+    }
+
+    res.json({
+      success: true,
+      itemId,
+      itemName: (item as any).itemName,
+      variationCount: ((item as any).variations || []).length,
+      totalSalesRecords: ((item as any).variations || []).reduce(
+        (sum: number, v: any) => sum + (v.salesHistory?.length || 0),
+        0,
+      ),
+      areaDistribution,
+      variationSummary,
+    });
+  } catch (error) {
+    console.error("Debug error:", error);
     res.status(500).json({
       error: error instanceof Error ? error.message : "Unknown error",
     });

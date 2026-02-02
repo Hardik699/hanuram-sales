@@ -36,7 +36,9 @@ export default function ItemDetail() {
         const response = await fetch("/api/sales/restaurants");
 
         if (!response.ok) {
-          console.error(`❌ Restaurants API returned ${response.status}: ${response.statusText}`);
+          console.error(
+            `❌ Restaurants API returned ${response.status}: ${response.statusText}`,
+          );
           // Try to get error details
           const errorText = await response.text();
           console.error("Error details:", errorText);
@@ -48,7 +50,10 @@ export default function ItemDetail() {
 
         if (result.success && Array.isArray(result.data)) {
           setRestaurants(result.data);
-          console.log(`📝 Found ${result.data.length} restaurants:`, result.data);
+          console.log(
+            `📝 Found ${result.data.length} restaurants:`,
+            result.data,
+          );
           // Set first restaurant as default if available
           if (result.data.length > 0 && !selectedRestaurant) {
             setSelectedRestaurant(result.data[0]);
@@ -58,7 +63,10 @@ export default function ItemDetail() {
         }
       } catch (error) {
         console.error("❌ Failed to fetch restaurants:", error);
-        console.error("Error details:", error instanceof Error ? error.message : String(error));
+        console.error(
+          "Error details:",
+          error instanceof Error ? error.message : String(error),
+        );
       } finally {
         setRestaurantsLoading(false);
       }
@@ -79,38 +87,53 @@ export default function ItemDetail() {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-        const response = await fetch("/api/items", { signal: controller.signal });
+        const response = await fetch("/api/items", {
+          signal: controller.signal,
+        });
         clearTimeout(timeoutId);
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`❌ API returned ${response.status}: ${response.statusText}`);
+          console.error(
+            `❌ API returned ${response.status}: ${response.statusText}`,
+          );
           console.error("Response:", errorText);
-          throw new Error(`Failed to fetch items: ${response.status} ${response.statusText}`);
+          throw new Error(
+            `Failed to fetch items: ${response.status} ${response.statusText}`,
+          );
         }
 
         const items = await response.json();
 
         if (!Array.isArray(items)) {
-          console.error("❌ Invalid response format, expected array but got:", typeof items);
+          console.error(
+            "❌ Invalid response format, expected array but got:",
+            typeof items,
+          );
           throw new Error("Invalid response format from server");
         }
 
         console.log(`📦 Received ${items.length} items from API`);
-        console.log("Available item IDs:", items.map((i: any) => i.itemId).join(", "));
+        console.log(
+          "Available item IDs:",
+          items.map((i: any) => i.itemId).join(", "),
+        );
 
         const foundItem = items.find((i: any) => i.itemId === itemId);
 
         if (!foundItem) {
           console.error(`❌ Item with ID "${itemId}" not found in database`);
-          setError(`Item with ID "${itemId}" not found. Make sure you've created this item first.`);
+          setError(
+            `Item with ID "${itemId}" not found. Make sure you've created this item first.`,
+          );
           setItem(null);
         } else {
           console.log(`✅ Found item: ${foundItem.itemName}`);
           setItem(foundItem);
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Failed to fetch item";
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to fetch item";
         console.error("❌ Error fetching item:", errorMessage);
         console.error("Full error:", error);
         setError(errorMessage);
@@ -176,7 +199,10 @@ export default function ItemDetail() {
 
       try {
         setSalesLoading(true);
-        const url = new URL(`/api/sales/item/${itemId}`, window.location.origin);
+        const url = new URL(
+          `/api/sales/item/${itemId}`,
+          window.location.origin,
+        );
         url.searchParams.set("startDate", dateRange.start);
         url.searchParams.set("endDate", dateRange.end);
         if (selectedRestaurant) {
@@ -188,12 +214,16 @@ export default function ItemDetail() {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
-        const response = await fetch(url.toString(), { signal: controller.signal });
+        const response = await fetch(url.toString(), {
+          signal: controller.signal,
+        });
         clearTimeout(timeoutId);
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`❌ Sales API returned ${response.status}: ${response.statusText}`);
+          console.error(
+            `❌ Sales API returned ${response.status}: ${response.statusText}`,
+          );
           console.error("Error details:", errorText);
           return;
         }
@@ -214,7 +244,20 @@ export default function ItemDetail() {
           const monthlyData = (data.monthlyData || []).map((item: any) => {
             const [year, month] = item.month.split("-");
             const monthNum = parseInt(month) - 1;
-            const monthName = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][monthNum];
+            const monthName = [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec",
+            ][monthNum];
             return {
               month: monthName,
               zomatoQty: item.zomatoQty || 0,
@@ -226,14 +269,16 @@ export default function ItemDetail() {
           });
 
           // Use pre-aggregated date-wise data
-          const dateWiseDataWithTotals = (data.dateWiseData || []).map((item: any) => ({
-            date: item.date,
-            zomatoQty: item.zomatoQty || 0,
-            swiggyQty: item.swiggyQty || 0,
-            diningQty: item.diningQty || 0,
-            parcelQty: item.parcelQty || 0,
-            totalQty: item.totalQty || 0,
-          }));
+          const dateWiseDataWithTotals = (data.dateWiseData || []).map(
+            (item: any) => ({
+              date: item.date,
+              zomatoQty: item.zomatoQty || 0,
+              swiggyQty: item.swiggyQty || 0,
+              diningQty: item.diningQty || 0,
+              parcelQty: item.parcelQty || 0,
+              totalQty: item.totalQty || 0,
+            }),
+          );
 
           const restaurantSales = data.restaurantSales || {};
 
@@ -243,9 +288,16 @@ export default function ItemDetail() {
           const allVariations = new Set<string>();
 
           // Collect all variation names
-          [data.zomatoData, data.swiggyData, data.diningData, data.parcelData].forEach((areaData: any) => {
+          [
+            data.zomatoData,
+            data.swiggyData,
+            data.diningData,
+            data.parcelData,
+          ].forEach((areaData: any) => {
             if (areaData?.variations) {
-              areaData.variations.forEach((v: any) => allVariations.add(v.name));
+              areaData.variations.forEach((v: any) =>
+                allVariations.add(v.name),
+              );
             }
           });
 
@@ -253,10 +305,18 @@ export default function ItemDetail() {
           allVariations.forEach((variationName) => {
             if (!addedVariations.has(variationName)) {
               addedVariations.add(variationName);
-              const zomatoVar = data.zomatoData?.variations?.find((v: any) => v.name === variationName);
-              const swiggyVar = data.swiggyData?.variations?.find((v: any) => v.name === variationName);
-              const diningVar = data.diningData?.variations?.find((v: any) => v.name === variationName);
-              const parcelVar = data.parcelData?.variations?.find((v: any) => v.name === variationName);
+              const zomatoVar = data.zomatoData?.variations?.find(
+                (v: any) => v.name === variationName,
+              );
+              const swiggyVar = data.swiggyData?.variations?.find(
+                (v: any) => v.name === variationName,
+              );
+              const diningVar = data.diningData?.variations?.find(
+                (v: any) => v.name === variationName,
+              );
+              const parcelVar = data.parcelData?.variations?.find(
+                (v: any) => v.name === variationName,
+              );
 
               salesTableData.push({
                 variationName,
@@ -278,8 +338,16 @@ export default function ItemDetail() {
                   value: parcelVar?.value || 0,
                 },
                 total: {
-                  quantity: (zomatoVar?.quantity || 0) + (swiggyVar?.quantity || 0) + (diningVar?.quantity || 0) + (parcelVar?.quantity || 0),
-                  value: (zomatoVar?.value || 0) + (swiggyVar?.value || 0) + (diningVar?.value || 0) + (parcelVar?.value || 0),
+                  quantity:
+                    (zomatoVar?.quantity || 0) +
+                    (swiggyVar?.quantity || 0) +
+                    (diningVar?.quantity || 0) +
+                    (parcelVar?.quantity || 0),
+                  value:
+                    (zomatoVar?.value || 0) +
+                    (swiggyVar?.value || 0) +
+                    (diningVar?.value || 0) +
+                    (parcelVar?.value || 0),
                 },
               });
             }
@@ -288,10 +356,26 @@ export default function ItemDetail() {
           setSalesData({
             monthlyData,
             dateWiseData: dateWiseDataWithTotals,
-            zomatoData: data.zomatoData || { quantity: 0, value: 0, variations: [] },
-            swiggyData: data.swiggyData || { quantity: 0, value: 0, variations: [] },
-            diningData: data.diningData || { quantity: 0, value: 0, variations: [] },
-            parcelData: data.parcelData || { quantity: 0, value: 0, variations: [] },
+            zomatoData: data.zomatoData || {
+              quantity: 0,
+              value: 0,
+              variations: [],
+            },
+            swiggyData: data.swiggyData || {
+              quantity: 0,
+              value: 0,
+              variations: [],
+            },
+            diningData: data.diningData || {
+              quantity: 0,
+              value: 0,
+              variations: [],
+            },
+            parcelData: data.parcelData || {
+              quantity: 0,
+              value: 0,
+              variations: [],
+            },
             salesTableData,
             restaurantSales,
           });
@@ -384,7 +468,7 @@ export default function ItemDetail() {
     );
   }
 
-  const CHANNELS = ["Dining", "Parcale", "Swiggy", "Zomato"];
+  const CHANNELS = ["Dining", "Parcale", "Swiggy", "Zomato", "GS1"];
 
   return (
     <div className="flex-1 p-6 sm:p-8">
@@ -392,9 +476,13 @@ export default function ItemDetail() {
       {showResetConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 rounded-lg">
           <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Reset Sales Data?</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Reset Sales Data?
+            </h2>
             <p className="text-gray-600 mb-6">
-              This will permanently delete all sales history for <strong>{item?.itemName}</strong> across all variations. This action cannot be undone.
+              This will permanently delete all sales history for{" "}
+              <strong>{item?.itemName}</strong> across all variations. This
+              action cannot be undone.
             </p>
             <div className="flex gap-3">
               <button
@@ -429,7 +517,9 @@ export default function ItemDetail() {
       <div className="bg-white rounded-t-xl border border-gray-200 border-b-0 p-6 mb-0">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{item.itemName}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {item.itemName}
+            </h1>
             <p className="text-gray-600">{item.description}</p>
           </div>
           <div className="flex gap-2">
@@ -496,18 +586,20 @@ export default function ItemDetail() {
                     </div>
                     {item.images.length > 1 && (
                       <div className="grid grid-cols-3 gap-2">
-                        {item.images.slice(1).map((img: string, idx: number) => (
-                          <div
-                            key={idx}
-                            className="w-full h-20 bg-gray-100 rounded-lg flex items-center justify-center"
-                          >
-                            <img
-                              src={img}
-                              alt={`${item.itemName} ${idx + 2}`}
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                          </div>
-                        ))}
+                        {item.images
+                          .slice(1)
+                          .map((img: string, idx: number) => (
+                            <div
+                              key={idx}
+                              className="w-full h-20 bg-gray-100 rounded-lg flex items-center justify-center"
+                            >
+                              <img
+                                src={img}
+                                alt={`${item.itemName} ${idx + 2}`}
+                                className="w-full h-full object-cover rounded-lg"
+                              />
+                            </div>
+                          ))}
                       </div>
                     )}
                   </div>
@@ -614,7 +706,10 @@ export default function ItemDetail() {
 
                   <div className="space-y-4">
                     {item.variations.map((variation: any, idx: number) => (
-                      <div key={idx} className="border border-gray-200 rounded-lg p-4">
+                      <div
+                        key={idx}
+                        className="border border-gray-200 rounded-lg p-4"
+                      >
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
                           <div>
                             <p className="text-xs font-semibold text-gray-500 uppercase">

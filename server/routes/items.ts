@@ -1,7 +1,8 @@
 import { RequestHandler } from "express";
 import { MongoClient, Db } from "mongodb";
 
-const MONGODB_URI = "mongodb+srv://admin:admin1@cluster0.a3duo.mongodb.net/?appName=Cluster0";
+const MONGODB_URI =
+  "mongodb+srv://admin:admin1@cluster0.a3duo.mongodb.net/?appName=Cluster0";
 
 let cachedClient: MongoClient | null = null;
 let cachedDb: Db | null = null;
@@ -34,7 +35,10 @@ async function getDatabase(): Promise<Db> {
     } catch (error) {
       console.error("❌ Failed to connect to MongoDB:", error);
       connectionPromise = null;
-      throw new Error("Database connection failed: " + (error instanceof Error ? error.message : String(error)));
+      throw new Error(
+        "Database connection failed: " +
+          (error instanceof Error ? error.message : String(error)),
+      );
     }
   })();
 
@@ -68,15 +72,23 @@ export const handleGetItems: RequestHandler = async (req, res) => {
 
     // Log first item structure to debug field names
     console.log("First item fields:", Object.keys(items[0]));
-    console.log("Item IDs from DB:", items.map(i => {
-      const item = i as any;
-      return `${item.itemId || item.itemName || "NO_ID"}`;
-    }).join(", "));
+    console.log(
+      "Item IDs from DB:",
+      items
+        .map((i) => {
+          const item = i as any;
+          return `${item.itemId || item.itemName || "NO_ID"}`;
+        })
+        .join(", "),
+    );
 
     // Ensure all items have itemId - if not, try to use shortCode or generate one
     const processedItems = items.map((item: any, index: number) => {
       if (!item.itemId) {
-        console.warn(`⚠️ Item at index ${index} missing itemId, has fields:`, Object.keys(item));
+        console.warn(
+          `⚠️ Item at index ${index} missing itemId, has fields:`,
+          Object.keys(item),
+        );
         // If itemId is missing, this item cannot be retrieved by ItemDetail page
         // Return it as-is so client can see the issue
       }
@@ -88,7 +100,7 @@ export const handleGetItems: RequestHandler = async (req, res) => {
     console.error("❌ Error fetching items:", error);
     res.status(500).json({
       error: "Failed to fetch items",
-      details: error instanceof Error ? error.message : String(error)
+      details: error instanceof Error ? error.message : String(error),
     });
   }
 };
@@ -106,7 +118,9 @@ export const handleGetItemById: RequestHandler = async (req, res) => {
     const item = await collection.findOne({ itemId });
 
     if (!item) {
-      return res.status(404).json({ error: `Item with ID "${itemId}" not found` });
+      return res
+        .status(404)
+        .json({ error: `Item with ID "${itemId}" not found` });
     }
 
     console.log(`✅ Retrieved item ${itemId}: ${(item as any).itemName}`);
@@ -115,7 +129,7 @@ export const handleGetItemById: RequestHandler = async (req, res) => {
     console.error("❌ Error fetching item:", error);
     res.status(500).json({
       error: "Failed to fetch item",
-      details: error instanceof Error ? error.message : String(error)
+      details: error instanceof Error ? error.message : String(error),
     });
   }
 };
@@ -127,7 +141,12 @@ export const handleCreateItem: RequestHandler = async (req, res) => {
 
     // Validate required fields
     if (!item.itemId || !item.itemName || !item.group || !item.category) {
-      console.error("❌ Missing required fields:", { itemId: item.itemId, itemName: item.itemName, group: item.group, category: item.category });
+      console.error("❌ Missing required fields:", {
+        itemId: item.itemId,
+        itemName: item.itemName,
+        group: item.group,
+        category: item.category,
+      });
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -137,7 +156,9 @@ export const handleCreateItem: RequestHandler = async (req, res) => {
     const existing = await collection.findOne({ itemId: item.itemId });
     if (existing) {
       console.warn(`⚠️ Item ${item.itemId} already exists`);
-      return res.status(409).json({ error: "Item with this ID already exists" });
+      return res
+        .status(409)
+        .json({ error: "Item with this ID already exists" });
     }
 
     const documentToInsert = {
@@ -155,19 +176,25 @@ export const handleCreateItem: RequestHandler = async (req, res) => {
 
     const result = await collection.insertOne(documentToInsert);
 
-    console.log(`✅ Item ${item.itemId} created with MongoDB ID:`, result.insertedId);
+    console.log(
+      `✅ Item ${item.itemId} created with MongoDB ID:`,
+      result.insertedId,
+    );
     console.log(`📝 Response includes itemId:`, item.itemId);
 
     // Ensure itemId is included in the response
     const responseItem = { ...item, _id: result.insertedId };
-    console.log(`📤 Sending response:`, { itemId: responseItem.itemId, itemName: responseItem.itemName });
+    console.log(`📤 Sending response:`, {
+      itemId: responseItem.itemId,
+      itemName: responseItem.itemName,
+    });
 
     res.status(201).json(responseItem);
   } catch (error) {
     console.error("❌ Error creating item:", error);
     res.status(500).json({
       error: "Failed to create item",
-      details: error instanceof Error ? error.message : String(error)
+      details: error instanceof Error ? error.message : String(error),
     });
   }
 };
@@ -187,7 +214,7 @@ export const handleUpdateItem: RequestHandler = async (req, res) => {
           ...updateData,
           updatedAt: new Date(),
         },
-      }
+      },
     );
 
     if (result.matchedCount === 0) {
@@ -218,6 +245,66 @@ export const handleDeleteItem: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error("Error deleting item:", error);
     res.status(500).json({ error: "Failed to delete item" });
+  }
+};
+
+// Migrate all items to add GS1 channel to variations
+export const handleAddGS1Channel: RequestHandler = async (req, res) => {
+  try {
+    const collection = await getItemsCollection();
+
+    // Find all items with variations
+    const items = await collection.find({}).toArray();
+
+    let updatedCount = 0;
+    let variationsUpdated = 0;
+
+    for (const item of items) {
+      if (item.variations && Array.isArray(item.variations)) {
+        let hasChanges = false;
+
+        // Update each variation to add GS1 channel if it doesn't exist
+        const updatedVariations = item.variations.map((variation: any) => {
+          if (!variation.channels) {
+            variation.channels = {};
+          }
+
+          if (!("GS1" in variation.channels)) {
+            variation.channels.GS1 = 0;
+            hasChanges = true;
+            variationsUpdated++;
+          }
+
+          return variation;
+        });
+
+        // If changes were made, update the item in the database
+        if (hasChanges) {
+          await collection.updateOne(
+            { _id: item._id },
+            { $set: { variations: updatedVariations, updatedAt: new Date() } },
+          );
+          updatedCount++;
+        }
+      }
+    }
+
+    console.log(
+      `✅ Migration complete: Updated ${updatedCount} items, added GS1 channel to ${variationsUpdated} variations`,
+    );
+
+    res.json({
+      success: true,
+      message: `Successfully added GS1 channel to ${variationsUpdated} variations across ${updatedCount} items`,
+      updatedItems: updatedCount,
+      variationsUpdated,
+    });
+  } catch (error) {
+    console.error("Error adding GS1 channel:", error);
+    res.status(500).json({
+      error: "Failed to add GS1 channel",
+      details: error instanceof Error ? error.message : String(error),
+    });
   }
 };
 
@@ -270,7 +357,7 @@ export const handleAddGroup: RequestHandler = async (req, res) => {
           variationValues: [],
         },
       },
-      { upsert: true }
+      { upsert: true },
     );
 
     res.status(201).json({ message: "Group added successfully" });
@@ -301,7 +388,7 @@ export const handleAddCategory: RequestHandler = async (req, res) => {
           variationValues: [],
         },
       },
-      { upsert: true }
+      { upsert: true },
     );
 
     res.status(201).json({ message: "Category added successfully" });
@@ -332,7 +419,7 @@ export const handleAddHsnCode: RequestHandler = async (req, res) => {
           variationValues: [],
         },
       },
-      { upsert: true }
+      { upsert: true },
     );
 
     res.status(201).json({ message: "HSN code added successfully" });
@@ -363,7 +450,7 @@ export const handleAddVariationValue: RequestHandler = async (req, res) => {
           hsnCodes: [],
         },
       },
-      { upsert: true }
+      { upsert: true },
     );
 
     res.status(201).json({ message: "Variation value added successfully" });
