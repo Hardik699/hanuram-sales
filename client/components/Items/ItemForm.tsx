@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { X, Plus, Trash2 } from "lucide-react";
 import { generateItemId, generateShortCode } from "@/lib/itemHelpers";
 
-const CHANNELS = ["Dining", "Parcale", "Swiggy", "Zomato"];
+const CHANNELS = ["Dining", "Parcale", "Swiggy", "Zomato", "GS1"];
 const ITEM_TYPES = ["Service", "Goods"];
 const UNIT_TYPES = ["Single Count", "GM to KG", "All Count"];
 const GST_OPTIONS = ["0%", "5%", "12%", "18%", "28%"];
