@@ -201,6 +201,10 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
     } else {
       // Default to last 365 days
       end = new Date();
+      // Set end to end-of-day
+      end = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate() + 1));
+      end = new Date(end.getTime() - 1);
+      // Set start to 365 days ago
       start = new Date(end.getTime() - 365 * 24 * 60 * 60 * 1000);
     }
 
