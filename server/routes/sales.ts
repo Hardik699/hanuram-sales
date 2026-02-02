@@ -147,7 +147,8 @@ function parseDate(dateStr: string): Date | null {
     const year = parseInt(isoMatch[1]);
     const month = parseInt(isoMatch[2]);
     const day = parseInt(isoMatch[3]);
-    return new Date(year, month - 1, day);
+    // Use UTC to avoid timezone issues
+    return new Date(Date.UTC(year, month - 1, day));
   }
 
   // Try other date formats
@@ -165,7 +166,7 @@ function parseDate(dateStr: string): Date | null {
         month = parseInt(match[1]);
         day = parseInt(match[2]);
       }
-      return new Date(year, month - 1, day);
+      return new Date(Date.UTC(year, month - 1, day));
     }
   }
 
