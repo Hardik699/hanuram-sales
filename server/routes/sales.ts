@@ -148,7 +148,9 @@ function parseDate(dateStr: string): Date | null {
     const month = parseInt(isoMatch[2]);
     const day = parseInt(isoMatch[3]);
     // Use UTC to avoid timezone issues
-    return new Date(Date.UTC(year, month - 1, day));
+    const result = new Date(Date.UTC(year, month - 1, day));
+    //console.log(`parseDate("${dateStr}") → ${result.toISOString()}`);
+    return result;
   }
 
   // Try other date formats
