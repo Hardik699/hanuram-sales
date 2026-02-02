@@ -18,11 +18,15 @@ export default function Items() {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-        const response = await fetch("/api/items", { signal: controller.signal });
+        const response = await fetch("/api/items", {
+          signal: controller.signal,
+        });
         clearTimeout(timeoutId);
 
         if (!response.ok) {
-          throw new Error(`API returned ${response.status} ${response.statusText}`);
+          throw new Error(
+            `API returned ${response.status} ${response.statusText}`,
+          );
         }
         const data = await response.json();
         console.log(`✅ Loaded ${data.length} items from MongoDB`);
@@ -31,7 +35,11 @@ export default function Items() {
         console.error("❌ Failed to fetch items:", error);
 
         // Retry once after 2 seconds if it's a network error
-        if (retryCount < 1 && error instanceof TypeError && error.message.includes("Failed to fetch")) {
+        if (
+          retryCount < 1 &&
+          error instanceof TypeError &&
+          error.message.includes("Failed to fetch")
+        ) {
           console.log("⏳ Retrying in 2 seconds...");
           setTimeout(() => fetchItems(retryCount + 1), 2000);
           return;
@@ -100,7 +108,7 @@ export default function Items() {
       "Item Type",
       "Unit Type",
       "Variations",
-      "Images Count"
+      "Images Count",
     ];
 
     const rows = data.map((item) => [
@@ -115,8 +123,9 @@ export default function Items() {
       item.gst || 0,
       item.itemType,
       item.unitType,
-      item.variations?.map((v: any) => `${v.name}: ${v.value}`).join("; ") || "",
-      item.images?.length || 0
+      item.variations?.map((v: any) => `${v.name}: ${v.value}`).join("; ") ||
+        "",
+      item.images?.length || 0,
     ]);
 
     const csv = [
@@ -125,11 +134,13 @@ export default function Items() {
         row
           .map((cell) => {
             const value = String(cell || "");
-            return value.includes(",") || value.includes('"') || value.includes("\n")
+            return value.includes(",") ||
+              value.includes('"') ||
+              value.includes("\n")
               ? `"${value.replace(/"/g, '""')}"`
               : value;
           })
-          .join(",")
+          .join(","),
       ),
     ].join("\n");
 
@@ -141,9 +152,17 @@ export default function Items() {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Items</h1>
-          <p className="text-gray-500 text-sm mt-1">Manage your product items and variations</p>
-          {loading && <p className="text-gray-400 text-xs mt-2">Loading items from MongoDB...</p>}
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Items
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Manage your product items and variations
+          </p>
+          {loading && (
+            <p className="text-gray-400 text-xs mt-2">
+              Loading items from MongoDB...
+            </p>
+          )}
         </div>
         <div className="flex gap-3">
           {items.length > 0 && !loading && (

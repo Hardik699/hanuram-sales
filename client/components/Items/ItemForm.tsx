@@ -6,8 +6,27 @@ const CHANNELS = ["Dining", "Parcale", "Swiggy", "Zomato", "GS1"];
 const ITEM_TYPES = ["Service", "Goods"];
 const UNIT_TYPES = ["Single Count", "GM to KG", "All Count"];
 const GST_OPTIONS = ["0%", "5%", "12%", "18%", "28%"];
-const HSN_CODES = ["1001", "1002", "1003", "1004", "1005", "2101", "2102", "2201", "2202", "2301"];
-const VARIATION_VALUES = ["200 Gms", "250 Gms", "500 Gms", "1 Kg", "500 ml", "1 L", "2 L"];
+const HSN_CODES = [
+  "1001",
+  "1002",
+  "1003",
+  "1004",
+  "1005",
+  "2101",
+  "2102",
+  "2201",
+  "2202",
+  "2301",
+];
+const VARIATION_VALUES = [
+  "200 Gms",
+  "250 Gms",
+  "500 Gms",
+  "1 Kg",
+  "500 ml",
+  "1 L",
+  "2 L",
+];
 
 interface Variation {
   id: string;
@@ -48,7 +67,8 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
   const [groups, setGroups] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [hsnCodes, setHsnCodes] = useState<string[]>(HSN_CODES);
-  const [variationValues, setVariationValues] = useState<string[]>(VARIATION_VALUES);
+  const [variationValues, setVariationValues] =
+    useState<string[]>(VARIATION_VALUES);
   const [newGroup, setNewGroup] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [newHsnCode, setNewHsnCode] = useState("");
@@ -137,7 +157,10 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
   };
 
   const addVariationValue = async () => {
-    if (newVariationValue.trim() && !variationValues.includes(newVariationValue)) {
+    if (
+      newVariationValue.trim() &&
+      !variationValues.includes(newVariationValue)
+    ) {
       try {
         const response = await fetch("/api/items/variation-values", {
           method: "POST",
@@ -172,7 +195,7 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
 
   const updateVariation = (id: string, field: string, value: any) => {
     setVariations(
-      variations.map((v) => (v.id === id ? { ...v, [field]: value } : v))
+      variations.map((v) => (v.id === id ? { ...v, [field]: value } : v)),
     );
   };
 
@@ -181,8 +204,8 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
       variations.map((v) =>
         v.id === id
           ? { ...v, channels: { ...v.channels, [channel]: value } }
-          : v
-      )
+          : v,
+      ),
     );
   };
 
@@ -249,7 +272,8 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
       console.log("✅ Item saved successfully:", savedItem.itemId);
       onSuccess(savedItem);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       console.error("❌ Failed to save item:", errorMessage);
       alert(`Error saving item: ${errorMessage}`);
     }
@@ -579,25 +603,26 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
                       +
                     </button>
                   </div>
-                  {newVariationValue !== null && newVariationValue !== undefined && (
-                    <div className="mt-2 flex gap-2">
-                      <input
-                        type="text"
-                        value={newVariationValue}
-                        onChange={(e) => setNewVariationValue(e.target.value)}
-                        placeholder="e.g., 300 Gms, 1.5 L"
-                        autoFocus
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
-                      />
-                      <button
-                        type="button"
-                        onClick={addVariationValue}
-                        className="px-3 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 font-semibold"
-                      >
-                        Add
-                      </button>
-                    </div>
-                  )}
+                  {newVariationValue !== null &&
+                    newVariationValue !== undefined && (
+                      <div className="mt-2 flex gap-2">
+                        <input
+                          type="text"
+                          value={newVariationValue}
+                          onChange={(e) => setNewVariationValue(e.target.value)}
+                          placeholder="e.g., 300 Gms, 1.5 L"
+                          autoFocus
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        />
+                        <button
+                          type="button"
+                          onClick={addVariationValue}
+                          className="px-3 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 font-semibold"
+                        >
+                          Add
+                        </button>
+                      </div>
+                    )}
                 </div>
 
                 <div>
@@ -611,7 +636,7 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
                       updateVariation(
                         variation.id,
                         "price",
-                        parseFloat(e.target.value)
+                        parseFloat(e.target.value),
                       )
                     }
                     placeholder="0"
@@ -645,7 +670,7 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
                       updateVariation(
                         variation.id,
                         "profitMargin",
-                        parseFloat(e.target.value)
+                        parseFloat(e.target.value),
                       )
                     }
                     step="0.01"
@@ -672,7 +697,7 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
                           updateChannelPrice(
                             variation.id,
                             channel,
-                            parseFloat(e.target.value)
+                            parseFloat(e.target.value),
                           )
                         }
                         placeholder="0"
@@ -698,9 +723,7 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
 
         {/* Image Upload */}
         <div className="border-t pt-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Images
-          </h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Images</h3>
           <div className="mb-4 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
             <input
               type="file"
@@ -710,10 +733,7 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
               className="hidden"
               id="image-input"
             />
-            <label
-              htmlFor="image-input"
-              className="cursor-pointer block"
-            >
+            <label htmlFor="image-input" className="cursor-pointer block">
               <p className="text-gray-700 font-medium">
                 Click to upload or drag images
               </p>

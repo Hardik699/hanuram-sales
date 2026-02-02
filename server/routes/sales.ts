@@ -1,7 +1,8 @@
 import { RequestHandler } from "express";
 import { MongoClient, Db } from "mongodb";
 
-const MONGODB_URI = "mongodb+srv://admin:admin1@cluster0.a3duo.mongodb.net/?appName=Cluster0";
+const MONGODB_URI =
+  "mongodb+srv://admin:admin1@cluster0.a3duo.mongodb.net/?appName=Cluster0";
 
 let cachedClient: MongoClient | null = null;
 let cachedDb: Db | null = null;
@@ -34,7 +35,10 @@ async function getDatabase(): Promise<Db> {
     } catch (error) {
       console.error("❌ Failed to connect to MongoDB:", error);
       connectionPromise = null;
-      throw new Error("Database connection failed: " + (error instanceof Error ? error.message : String(error)));
+      throw new Error(
+        "Database connection failed: " +
+          (error instanceof Error ? error.message : String(error)),
+      );
     }
   })();
 
@@ -110,7 +114,8 @@ export const handleGetSales: RequestHandler = async (req, res) => {
       data: salesRecords,
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     res.status(500).json({
       success: false,
       error: errorMessage,
@@ -119,7 +124,10 @@ export const handleGetSales: RequestHandler = async (req, res) => {
 };
 
 // Helper function to map order type
-function mapOrderType(orderType: string, area: string): "Dining" | "Parcel" | "Online" {
+function mapOrderType(
+  orderType: string,
+  area: string,
+): "Dining" | "Parcel" | "Online" {
   const orderTypeLower = orderType?.toLowerCase() || "";
   const areaLower = area?.toLowerCase() || "";
 
@@ -224,8 +232,12 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
       });
     }
 
-    console.log(`📊 Fetching sales for item ${itemId} from stored salesHistory`);
-    console.log(`📅 Date range: ${start.toISOString()} to ${end.toISOString()}`);
+    console.log(
+      `📊 Fetching sales for item ${itemId} from stored salesHistory`,
+    );
+    console.log(
+      `📅 Date range: ${start.toISOString()} to ${end.toISOString()}`,
+    );
 
     // Aggregate sales data by month, day, area, and restaurant
     const monthlyByArea: { [key: string]: { [area: string]: number } } = {};
@@ -252,7 +264,9 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
         }
 
         const variationName = variation.name || `Variation ${idx + 1}`;
-        console.log(`  Processing variation ${idx} (${variationName}): ${variation.salesHistory.length} records`);
+        console.log(
+          `  Processing variation ${idx} (${variationName}): ${variation.salesHistory.length} records`,
+        );
 
         variation.salesHistory.forEach((record: any) => {
           totalRecordsProcessed++;
@@ -260,8 +274,12 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
 
           // Debug first few records
           if (totalRecordsProcessed <= 3) {
-            console.log(`    Record ${totalRecordsProcessed}: date="${record.date}" → parsed="${recordDate?.toISOString()}" (start=${start.toISOString()}, end=${end.toISOString()})`);
-            console.log(`    Comparison: ${recordDate?.getTime()} < ${start.getTime()} ? ${recordDate! < start}, ${recordDate?.getTime()} > ${end.getTime()} ? ${recordDate! > end}`);
+            console.log(
+              `    Record ${totalRecordsProcessed}: date="${record.date}" → parsed="${recordDate?.toISOString()}" (start=${start.toISOString()}, end=${end.toISOString()})`,
+            );
+            console.log(
+              `    Comparison: ${recordDate?.getTime()} < ${start.getTime()} ? ${recordDate! < start}, ${recordDate?.getTime()} > ${end.getTime()} ? ${recordDate! > end}`,
+            );
           }
 
           if (!recordDate || recordDate < start || recordDate > end) {
@@ -276,7 +294,11 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
 
           // Normalize area to lowercase (handles cases where area might be stored as "Zomato" or "ZOMATO")
           const rawArea = record.area || "dining";
-          const area = (rawArea.toLowerCase()) as "zomato" | "swiggy" | "dining" | "parcel";
+          const area = rawArea.toLowerCase() as
+            | "zomato"
+            | "swiggy"
+            | "dining"
+            | "parcel";
           const quantity = record.quantity || 0;
           const restaurantName = record.restaurant || "Unknown";
 
@@ -290,7 +312,8 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
           // Aggregate by month & area
           const month = recordDate.toISOString().substring(0, 7); // YYYY-MM
           if (!monthlyByArea[month]) monthlyByArea[month] = {};
-          monthlyByArea[month][area] = (monthlyByArea[month][area] || 0) + quantity;
+          monthlyByArea[month][area] =
+            (monthlyByArea[month][area] || 0) + quantity;
 
           // Aggregate by day & area
           const day = recordDate.toISOString().substring(0, 10); // YYYY-MM-DD
@@ -298,13 +321,17 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
           dailyByArea[day][area] = (dailyByArea[day][area] || 0) + quantity;
 
           // Aggregate by restaurant
-          restaurantSales[restaurantName] = (restaurantSales[restaurantName] || 0) + quantity;
+          restaurantSales[restaurantName] =
+            (restaurantSales[restaurantName] || 0) + quantity;
         });
       });
     }
 
     // Format data for output
-    const formatAreaData = (areaKey: string, data: { [variationName: string]: { quantity: number; value: number } }) => {
+    const formatAreaData = (
+      areaKey: string,
+      data: { [variationName: string]: { quantity: number; value: number } },
+    ) => {
       const variations = Object.entries(data).map(([variationName, info]) => ({
         name: variationName,
         quantity: info.quantity,
@@ -327,7 +354,11 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
         swiggyQty: areas.swiggy || 0,
         diningQty: areas.dining || 0,
         parcelQty: areas.parcel || 0,
-        totalQty: (areas.zomato || 0) + (areas.swiggy || 0) + (areas.dining || 0) + (areas.parcel || 0),
+        totalQty:
+          (areas.zomato || 0) +
+          (areas.swiggy || 0) +
+          (areas.dining || 0) +
+          (areas.parcel || 0),
       }));
 
     // Build daily chart data
@@ -339,7 +370,11 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
         swiggyQty: areas.swiggy || 0,
         diningQty: areas.dining || 0,
         parcelQty: areas.parcel || 0,
-        totalQty: (areas.zomato || 0) + (areas.swiggy || 0) + (areas.dining || 0) + (areas.parcel || 0),
+        totalQty:
+          (areas.zomato || 0) +
+          (areas.swiggy || 0) +
+          (areas.dining || 0) +
+          (areas.parcel || 0),
       }));
 
     const salesData = {
@@ -371,7 +406,8 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in handleGetItemSales:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     res.status(500).json({
       success: false,
       error: errorMessage,
@@ -415,7 +451,8 @@ export const handleGetSalesSummary: RequestHandler = async (req, res) => {
       data: summary,
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     res.status(500).json({
       success: false,
       error: errorMessage,
@@ -432,7 +469,8 @@ export const handleRecordSale: RequestHandler = async (req, res) => {
     if (!itemId || !variationId || !channel || !quantity || !value || !date) {
       res.status(400).json({
         success: false,
-        error: "Missing required fields: itemId, variationId, channel, quantity, value, date",
+        error:
+          "Missing required fields: itemId, variationId, channel, quantity, value, date",
       });
       return;
     }
@@ -455,7 +493,8 @@ export const handleRecordSale: RequestHandler = async (req, res) => {
       data: saleRecord,
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     res.status(500).json({
       success: false,
       error: errorMessage,
@@ -476,7 +515,8 @@ export const handleGetMonthlySales: RequestHandler = async (req, res) => {
       data: monthlyData,
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     res.status(500).json({
       success: false,
       error: errorMessage,
@@ -497,7 +537,8 @@ export const handleGetDailySales: RequestHandler = async (req, res) => {
       data: dailyData,
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     res.status(500).json({
       success: false,
       error: errorMessage,
@@ -550,7 +591,11 @@ export const handleDebugItemSalesRaw: RequestHandler = async (req, res) => {
         variation.salesHistory.forEach((record: any) => {
           totalRecords++;
           const rawArea = record.area || "dining";
-          const area = (rawArea.toLowerCase()) as "zomato" | "swiggy" | "dining" | "parcel";
+          const area = rawArea.toLowerCase() as
+            | "zomato"
+            | "swiggy"
+            | "dining"
+            | "parcel";
           areaCount[area] = (areaCount[area] || 0) + 1;
 
           if (!salesByArea[area][variationName]) {
@@ -562,7 +607,9 @@ export const handleDebugItemSalesRaw: RequestHandler = async (req, res) => {
       });
     }
 
-    const formatAreaData = (data: { [variationName: string]: { quantity: number; value: number } }) => {
+    const formatAreaData = (data: {
+      [variationName: string]: { quantity: number; value: number };
+    }) => {
       const variations = Object.entries(data).map(([variationName, info]) => ({
         name: variationName,
         quantity: info.quantity,
@@ -605,21 +652,26 @@ export const handleGetRestaurants: RequestHandler = async (req, res) => {
     // Aggregate all unique restaurant names from salesHistory
     console.log("🔍 Running MongoDB aggregation to find unique restaurants...");
 
-    const restaurants = await itemsCollection.aggregate([
-      { $unwind: "$variations" },
-      { $unwind: "$variations.salesHistory" },
-      {
-        $group: {
-          _id: "$variations.salesHistory.restaurant",
+    const restaurants = await itemsCollection
+      .aggregate([
+        { $unwind: "$variations" },
+        { $unwind: "$variations.salesHistory" },
+        {
+          $group: {
+            _id: "$variations.salesHistory.restaurant",
+          },
         },
-      },
-      { $match: { _id: { $nin: [null, ""] } } },
-      { $sort: { _id: 1 } },
-    ]).toArray();
+        { $match: { _id: { $nin: [null, ""] } } },
+        { $sort: { _id: 1 } },
+      ])
+      .toArray();
 
     const restaurantNames = restaurants.map((r: any) => r._id).filter(Boolean);
 
-    console.log(`✅ Found ${restaurantNames.length} unique restaurants:`, restaurantNames);
+    console.log(
+      `✅ Found ${restaurantNames.length} unique restaurants:`,
+      restaurantNames,
+    );
 
     res.json({
       success: true,
@@ -627,7 +679,8 @@ export const handleGetRestaurants: RequestHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error fetching restaurants:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     console.error("Error details:", errorMessage);
     res.status(500).json({
       success: false,
@@ -667,10 +720,12 @@ export const handleResetItemSales: RequestHandler = async (req, res) => {
         $set: {
           "variations.$[].salesHistory": [],
         },
-      }
+      },
     );
 
-    console.log(`✅ Reset sales data for item ${itemId}. Matched: ${result.matchedCount}, Modified: ${result.modifiedCount}`);
+    console.log(
+      `✅ Reset sales data for item ${itemId}. Matched: ${result.matchedCount}, Modified: ${result.modifiedCount}`,
+    );
 
     res.json({
       success: true,
@@ -679,7 +734,8 @@ export const handleResetItemSales: RequestHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Error resetting sales data:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     res.status(500).json({
       success: false,
       error: errorMessage,

@@ -2,8 +2,18 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
-import { handleUpload, handleGetUploads, handleUpdateUpload, handleGetData, handleValidateUpload } from "./routes/upload";
-import { handleDebugItemSales, handleUpdateItemShortCode, handleDebugSalesHistory } from "./routes/debug";
+import {
+  handleUpload,
+  handleGetUploads,
+  handleUpdateUpload,
+  handleGetData,
+  handleValidateUpload,
+} from "./routes/upload";
+import {
+  handleDebugItemSales,
+  handleUpdateItemShortCode,
+  handleDebugSalesHistory,
+} from "./routes/debug";
 import {
   handleGetAllSapCodes,
   handleGetItemsWithSapCodes,
@@ -11,8 +21,14 @@ import {
   handleBatchSetSapCodes,
   handleMatchSapCodes,
 } from "./routes/sap-matching";
-import { handleSapDebugInfo, handleDebugSalesForItem } from "./routes/sap-debug";
-import { handleViewPetpooja, handleSearchSapCode } from "./routes/view-petpooja";
+import {
+  handleSapDebugInfo,
+  handleDebugSalesForItem,
+} from "./routes/sap-debug";
+import {
+  handleViewPetpooja,
+  handleSearchSapCode,
+} from "./routes/view-petpooja";
 import { handleCheckAllData, handleShowSampleRows } from "./routes/check-data";
 import {
   handleGetItems,
@@ -121,10 +137,19 @@ export function createServer() {
   app.post("/api/sales", handleRecordSale);
 
   // Error handling middleware
-  app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    console.error("Server error:", err);
-    res.status(500).json({ error: "Internal server error", message: err?.message });
-  });
+  app.use(
+    (
+      err: any,
+      _req: express.Request,
+      res: express.Response,
+      _next: express.NextFunction,
+    ) => {
+      console.error("Server error:", err);
+      res
+        .status(500)
+        .json({ error: "Internal server error", message: err?.message });
+    },
+  );
 
   return app;
 }

@@ -1,7 +1,8 @@
 import { RequestHandler } from "express";
 import { MongoClient, Db } from "mongodb";
 
-const MONGODB_URI = "mongodb+srv://admin:admin1@cluster0.a3duo.mongodb.net/?appName=Cluster0";
+const MONGODB_URI =
+  "mongodb+srv://admin:admin1@cluster0.a3duo.mongodb.net/?appName=Cluster0";
 
 let cachedDb: Db | null = null;
 
@@ -58,7 +59,7 @@ export const handleDebugItemSales: RequestHandler = async (req, res) => {
       const dataRows = doc.data.slice(1);
 
       const sapCodeIdx = headers.findIndex(
-        (h) => h.toLowerCase().trim() === "sap_code"
+        (h) => h.toLowerCase().trim() === "sap_code",
       );
 
       if (sapCodeIdx === -1) continue;
@@ -124,16 +125,14 @@ export const handleUpdateItemShortCode: RequestHandler = async (req, res) => {
 
     const result = await itemsCollection.updateOne(
       { itemId },
-      { $set: { shortCode, updatedAt: new Date() } }
+      { $set: { shortCode, updatedAt: new Date() } },
     );
 
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: `Item ${itemId} not found` });
     }
 
-    console.log(
-      `✅ Updated item ${itemId} shortCode to ${shortCode}`
-    );
+    console.log(`✅ Updated item ${itemId} shortCode to ${shortCode}`);
 
     res.json({
       success: true,
@@ -208,7 +207,10 @@ export const handleDebugSalesHistory: RequestHandler = async (req, res) => {
       itemId,
       itemName: (item as any).itemName,
       variationCount: ((item as any).variations || []).length,
-      totalSalesRecords: ((item as any).variations || []).reduce((sum: number, v: any) => sum + (v.salesHistory?.length || 0), 0),
+      totalSalesRecords: ((item as any).variations || []).reduce(
+        (sum: number, v: any) => sum + (v.salesHistory?.length || 0),
+        0,
+      ),
       areaDistribution,
       variationSummary,
     });
