@@ -110,6 +110,7 @@ export function createServer() {
   app.delete("/api/items/:itemId", handleDeleteItem);
 
   // Sales routes
+  app.get("/api/sales/debug-raw", handleDebugItemSalesRaw);
   app.get("/api/sales", handleGetSales);
   app.get("/api/sales/restaurants", handleGetRestaurants);
   app.get("/api/sales/summary", handleGetSalesSummary);
