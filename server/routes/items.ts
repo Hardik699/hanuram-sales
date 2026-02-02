@@ -221,6 +221,66 @@ export const handleDeleteItem: RequestHandler = async (req, res) => {
   }
 };
 
+// Migrate all items to add GS1 channel to variations
+export const handleAddGS1Channel: RequestHandler = async (req, res) => {
+  try {
+    const collection = await getItemsCollection();
+
+    // Find all items with variations
+    const items = await collection.find({}).toArray();
+
+    let updatedCount = 0;
+    let variationsUpdated = 0;
+
+    for (const item of items) {
+      if (item.variations && Array.isArray(item.variations)) {
+        let hasChanges = false;
+
+        // Update each variation to add GS1 channel if it doesn't exist
+        const updatedVariations = item.variations.map((variation: any) => {
+          if (!variation.channels) {
+            variation.channels = {};
+          }
+
+          if (!("GS1" in variation.channels)) {
+            variation.channels.GS1 = 0;
+            hasChanges = true;
+            variationsUpdated++;
+          }
+
+          return variation;
+        });
+
+        // If changes were made, update the item in the database
+        if (hasChanges) {
+          await collection.updateOne(
+            { _id: item._id },
+            { $set: { variations: updatedVariations, updatedAt: new Date() } }
+          );
+          updatedCount++;
+        }
+      }
+    }
+
+    console.log(
+      `✅ Migration complete: Updated ${updatedCount} items, added GS1 channel to ${variationsUpdated} variations`
+    );
+
+    res.json({
+      success: true,
+      message: `Successfully added GS1 channel to ${variationsUpdated} variations across ${updatedCount} items`,
+      updatedItems: updatedCount,
+      variationsUpdated,
+    });
+  } catch (error) {
+    console.error("Error adding GS1 channel:", error);
+    res.status(500).json({
+      error: "Failed to add GS1 channel",
+      details: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
 // Get all dropdown options (groups, categories, HSN codes, variation values)
 export const handleGetDropdowns: RequestHandler = async (req, res) => {
   try {
