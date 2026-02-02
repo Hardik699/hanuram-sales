@@ -53,6 +53,25 @@ export default function Items() {
     setShowForm(false);
   };
 
+  // Migrate existing items to add GS1 channel (runs once on mount)
+  useEffect(() => {
+    const migrateGS1 = async () => {
+      try {
+        const response = await fetch("/api/items/migrate/add-gs1", {
+          method: "POST",
+        });
+        if (response.ok) {
+          const result = await response.json();
+          console.log("✅ GS1 migration completed:", result);
+        }
+      } catch (error) {
+        console.error("GS1 migration failed (non-critical):", error);
+      }
+    };
+
+    migrateGS1();
+  }, []);
+
   const handleDownload = () => {
     // Export items as CSV/Excel
     const csv = convertToCSV(items);
