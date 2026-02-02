@@ -215,6 +215,7 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
     }
 
     console.log(`📊 Fetching sales for item ${itemId} from stored salesHistory`);
+    console.log(`📅 Date range: ${start.toISOString()} to ${end.toISOString()}`);
 
     // Aggregate sales data by month, day, area, and restaurant
     const monthlyByArea: { [key: string]: { [area: string]: number } } = {};
@@ -231,6 +232,9 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
       parcel: {},
     };
 
+    let totalRecordsProcessed = 0;
+    let totalRecordsFiltered = 0;
+
     if ((item as any).variations && Array.isArray((item as any).variations)) {
       (item as any).variations.forEach((variation: any, idx: number) => {
         if (!variation.salesHistory || !Array.isArray(variation.salesHistory)) {
@@ -238,10 +242,13 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
         }
 
         const variationName = variation.name || `Variation ${idx + 1}`;
+        console.log(`  Processing variation ${idx} (${variationName}): ${variation.salesHistory.length} records`);
 
         variation.salesHistory.forEach((record: any) => {
+          totalRecordsProcessed++;
           const recordDate = parseDate(record.date);
           if (!recordDate || recordDate < start || recordDate > end) {
+            totalRecordsFiltered++;
             return;
           }
 
