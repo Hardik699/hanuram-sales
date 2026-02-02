@@ -384,7 +384,7 @@ export default function ItemDetail() {
     );
   }
 
-  const CHANNELS = ["Dining", "Parcale", "Swiggy", "Zomato"];
+  const CHANNELS = ["Dining", "Parcale", "Swiggy", "Zomato", "GS1"];
 
   return (
     <div className="flex-1 p-6 sm:p-8">
