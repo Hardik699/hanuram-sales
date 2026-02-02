@@ -488,6 +488,95 @@ export const handleGetDailySales: RequestHandler = async (req, res) => {
   }
 };
 
+// Debug endpoint - Get raw sales data for an item without date filtering
+export const handleDebugItemSalesRaw: RequestHandler = async (req, res) => {
+  try {
+    const { itemId } = req.query;
+
+    if (!itemId) {
+      return res.status(400).json({ error: "itemId query parameter required" });
+    }
+
+    const db = await getDatabase();
+    const itemsCollection = db.collection("items");
+    const item = await itemsCollection.findOne({ itemId });
+
+    if (!item) {
+      return res.json({
+        success: false,
+        error: `Item ${itemId} not found`,
+      });
+    }
+
+    const salesByArea: {
+      [key in "zomato" | "swiggy" | "dining" | "parcel"]: {
+        [variationName: string]: { quantity: number; value: number };
+      };
+    } = {
+      zomato: {},
+      swiggy: {},
+      dining: {},
+      parcel: {},
+    };
+
+    let totalRecords = 0;
+    let areaCount: { [key: string]: number } = {};
+
+    if ((item as any).variations && Array.isArray((item as any).variations)) {
+      (item as any).variations.forEach((variation: any, idx: number) => {
+        if (!variation.salesHistory || !Array.isArray(variation.salesHistory)) {
+          return;
+        }
+
+        const variationName = variation.name || `Variation ${idx + 1}`;
+
+        variation.salesHistory.forEach((record: any) => {
+          totalRecords++;
+          const rawArea = record.area || "dining";
+          const area = (rawArea.toLowerCase()) as "zomato" | "swiggy" | "dining" | "parcel";
+          areaCount[area] = (areaCount[area] || 0) + 1;
+
+          if (!salesByArea[area][variationName]) {
+            salesByArea[area][variationName] = { quantity: 0, value: 0 };
+          }
+          salesByArea[area][variationName].quantity += record.quantity || 0;
+          salesByArea[area][variationName].value += record.value || 0;
+        });
+      });
+    }
+
+    const formatAreaData = (data: { [variationName: string]: { quantity: number; value: number } }) => {
+      const variations = Object.entries(data).map(([variationName, info]) => ({
+        name: variationName,
+        quantity: info.quantity,
+        value: info.value,
+      }));
+      return {
+        quantity: variations.reduce((sum, v) => sum + v.quantity, 0),
+        value: variations.reduce((sum, v) => sum + v.value, 0),
+        variations,
+      };
+    };
+
+    res.json({
+      success: true,
+      itemId,
+      itemName: (item as any).itemName,
+      totalRecords,
+      areaCount,
+      zomatoData: formatAreaData(salesByArea.zomato),
+      swiggyData: formatAreaData(salesByArea.swiggy),
+      diningData: formatAreaData(salesByArea.dining),
+      parcelData: formatAreaData(salesByArea.parcel),
+    });
+  } catch (error) {
+    console.error("Error in debug sales raw:", error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
 // GET /api/sales/restaurants - Get unique restaurant names from all sales data
 export const handleGetRestaurants: RequestHandler = async (req, res) => {
   try {
