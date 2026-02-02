@@ -183,19 +183,26 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
     const { itemId } = req.params;
     const { startDate, endDate, restaurant } = req.query;
 
-    // Parse dates with defaults
-    const start = startDate ? parseDate(startDate as string) : null;
-    const endDateParsed = endDate ? parseDate(endDate as string) : null;
+    // Parse dates - if not provided, use last 365 days as default
+    let start: Date, end: Date;
 
-    if (!start || !endDateParsed) {
-      return res.status(400).json({
-        success: false,
-        error: "Valid startDate and endDate are required",
-      });
+    if (startDate && endDate) {
+      const parsedStart = parseDate(startDate as string);
+      const parsedEnd = parseDate(endDate as string);
+
+      if (!parsedStart || !parsedEnd) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid date format. Use YYYY-MM-DD",
+        });
+      }
+      start = parsedStart;
+      end = new Date(parsedEnd.getTime() + 24 * 60 * 60 * 1000 - 1);
+    } else {
+      // Default to last 365 days
+      end = new Date();
+      start = new Date(end.getTime() - 365 * 24 * 60 * 60 * 1000);
     }
-
-    // End date should include the entire day (23:59:59.999)
-    const end = new Date(endDateParsed.getTime() + 24 * 60 * 60 * 1000 - 1);
 
     const db = await getDatabase();
 
