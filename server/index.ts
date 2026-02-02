@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { handleUpload, handleGetUploads, handleUpdateUpload, handleGetData, handleValidateUpload } from "./routes/upload";
-import { handleDebugItemSales, handleUpdateItemShortCode } from "./routes/debug";
+import { handleDebugItemSales, handleUpdateItemShortCode, handleDebugSalesHistory } from "./routes/debug";
 import {
   handleGetAllSapCodes,
   handleGetItemsWithSapCodes,
