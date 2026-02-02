@@ -25,6 +25,7 @@ import {
   handleAddCategory,
   handleAddHsnCode,
   handleAddVariationValue,
+  handleAddGS1Channel,
 } from "./routes/items";
 import {
   handleGetSales,
