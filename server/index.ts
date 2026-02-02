@@ -59,6 +59,7 @@ export function createServer() {
 
   // Debug endpoints
   app.get("/api/debug/item-sales", handleDebugItemSales);
+  app.get("/api/debug/sales-history", handleDebugSalesHistory);
   app.post("/api/debug/update-shortcode", handleUpdateItemShortCode);
 
   // SAP Code matching endpoints
