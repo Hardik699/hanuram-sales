@@ -183,14 +183,17 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
 
     // Parse dates with defaults
     const start = startDate ? parseDate(startDate as string) : null;
-    const end = endDate ? parseDate(endDate as string) : null;
+    const endDateParsed = endDate ? parseDate(endDate as string) : null;
 
-    if (!start || !end) {
+    if (!start || !endDateParsed) {
       return res.status(400).json({
         success: false,
         error: "Valid startDate and endDate are required",
       });
     }
+
+    // End date should include the entire day (23:59:59.999)
+    const end = new Date(endDateParsed.getTime() + 24 * 60 * 60 * 1000 - 1);
 
     const db = await getDatabase();
 
