@@ -247,6 +247,13 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
         variation.salesHistory.forEach((record: any) => {
           totalRecordsProcessed++;
           const recordDate = parseDate(record.date);
+
+          // Debug first few records
+          if (totalRecordsProcessed <= 3) {
+            console.log(`    Record ${totalRecordsProcessed}: date="${record.date}" → parsed="${recordDate?.toISOString()}" (start=${start.toISOString()}, end=${end.toISOString()})`);
+            console.log(`    Comparison: ${recordDate?.getTime()} < ${start.getTime()} ? ${recordDate! < start}, ${recordDate?.getTime()} > ${end.getTime()} ? ${recordDate! > end}`);
+          }
+
           if (!recordDate || recordDate < start || recordDate > end) {
             totalRecordsFiltered++;
             return;
