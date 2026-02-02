@@ -183,7 +183,7 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
     const { itemId } = req.params;
     const { startDate, endDate, restaurant } = req.query;
 
-    // Parse dates - if not provided, use last 365 days as default
+    // Parse dates
     let start: Date, end: Date;
 
     if (startDate && endDate) {
@@ -191,21 +191,18 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
       const parsedEnd = parseDate(endDate as string);
 
       if (!parsedStart || !parsedEnd) {
-        return res.status(400).json({
-          success: false,
-          error: "Invalid date format. Use YYYY-MM-DD",
-        });
+        // If dates can't be parsed, just return all data (no filtering)
+        start = new Date("2000-01-01");
+        end = new Date("2099-12-31");
+      } else {
+        start = parsedStart;
+        // End date should include the entire day (next day at 00:00 - 1ms = 23:59:59.999)
+        end = new Date(parsedEnd.getTime() + 24 * 60 * 60 * 1000 - 1);
       }
-      start = parsedStart;
-      end = new Date(parsedEnd.getTime() + 24 * 60 * 60 * 1000 - 1);
     } else {
-      // Default to last 365 days
-      end = new Date();
-      // Set end to end-of-day
-      end = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate() + 1));
-      end = new Date(end.getTime() - 1);
-      // Set start to 365 days ago
-      start = new Date(end.getTime() - 365 * 24 * 60 * 60 * 1000);
+      // Default to wide range that will include all data
+      start = new Date("2000-01-01");
+      end = new Date("2099-12-31");
     }
 
     const db = await getDatabase();
