@@ -337,7 +337,6 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
     };
 
     console.log(`✅ Sales data for ${itemId}:`, {
-      totalRecords: variation.salesHistory?.length || 0,
       totalProcessed: totalRecordsProcessed,
       totalFiltered: totalRecordsFiltered,
       zomato: salesData.zomatoData.quantity,
