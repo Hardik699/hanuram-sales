@@ -285,7 +285,23 @@ export default function ItemEdit() {
 
   const updateVariation = (id: string, field: string, value: any) => {
     setVariations(
-      variations.map((v) => (v.id === id ? { ...v, [field]: value } : v))
+      variations.map((v) => {
+        if (v.id !== id) return v;
+
+        const updated = { ...v, [field]: value };
+
+        // Auto-calculate Zomato and Swiggy prices when base price changes
+        if (field === "price") {
+          const autoPrices = calculateAutoPrices(value);
+          updated.channels = {
+            ...updated.channels,
+            Zomato: autoPrices.Zomato,
+            Swiggy: autoPrices.Swiggy,
+          };
+        }
+
+        return updated;
+      })
     );
   };
 
