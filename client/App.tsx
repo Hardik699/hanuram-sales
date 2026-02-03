@@ -49,6 +49,16 @@ const App = () => {
             />
             {/* More specific routes must come BEFORE less specific ones */}
             <Route
+              path="/items/:itemId/edit"
+              element={
+                <ProtectedRoute>
+                  <ProtectedLayout>
+                    <ItemEdit />
+                  </ProtectedLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/items/:itemId"
               element={
                 <ProtectedRoute>
