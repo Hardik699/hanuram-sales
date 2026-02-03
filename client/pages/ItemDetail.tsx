@@ -8,6 +8,24 @@ import SalesCharts from "@/components/ItemDetail/SalesCharts";
 
 console.log("📄 ItemDetail module loaded");
 
+// Helper function to calculate auto pricing
+const calculateAutoPrices = (basePrice: number) => {
+  if (basePrice <= 0) return { Zomato: 0, Swiggy: 0 };
+
+  // Add 15% markup
+  const priceWith15Percent = basePrice * 1.15;
+
+  // Round to nearest 5
+  const roundToNearest5 = (price: number) => {
+    return Math.round(price / 5) * 5;
+  };
+
+  const autoPriceZomato = roundToNearest5(priceWith15Percent);
+  const autoPriceSwiggy = roundToNearest5(priceWith15Percent);
+
+  return { Zomato: autoPriceZomato, Swiggy: autoPriceSwiggy };
+};
+
 export default function ItemDetail() {
   console.log("🎯 ItemDetail component rendering");
   const params = useParams<{ itemId: string }>();
