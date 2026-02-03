@@ -725,12 +725,19 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {CHANNELS.map((channel) => {
-                    const isAutoCalculated = ["Zomato", "Swiggy"].includes(channel);
+                    const isAutoCalculated = ["Zomato", "Swiggy"].includes(
+                      channel,
+                    );
                     return (
                       <div key={channel}>
                         <label className="text-xs text-gray-600 block mb-1">
                           {channel}
-                          {isAutoCalculated && <span className="text-blue-600 font-semibold"> (auto)</span>}
+                          {isAutoCalculated && (
+                            <span className="text-blue-600 font-semibold">
+                              {" "}
+                              (auto)
+                            </span>
+                          )}
                         </label>
                         <input
                           type="number"
@@ -746,7 +753,9 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
                           step="0.01"
                           disabled={isAutoCalculated}
                           className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 ${
-                            isAutoCalculated ? "bg-blue-50 text-gray-500 cursor-not-allowed" : ""
+                            isAutoCalculated
+                              ? "bg-blue-50 text-gray-500 cursor-not-allowed"
+                              : ""
                           }`}
                         />
                       </div>

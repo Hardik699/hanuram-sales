@@ -38,8 +38,10 @@ export default function ItemDetail() {
 
   // Initialize with default date range (last 365 days)
   const getDefaultDateRange = () => {
-    const endDate = new Date().toISOString().split('T')[0];
-    const startDate = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const endDate = new Date().toISOString().split("T")[0];
+    const startDate = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
     return { start: startDate, end: endDate };
   };
 
@@ -784,14 +786,23 @@ export default function ItemDetail() {
                           </p>
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             {CHANNELS.map((channel) => {
-                              const isAutoCalculated = ["Zomato", "Swiggy"].includes(channel);
-                              let displayPrice = variation.channels[channel] || "-";
+                              const isAutoCalculated = [
+                                "Zomato",
+                                "Swiggy",
+                              ].includes(channel);
+                              let displayPrice =
+                                variation.channels[channel] || "-";
                               let bgColor = "bg-gray-50";
 
                               // Show auto-calculated prices for Zomato and Swiggy
                               if (isAutoCalculated && variation.price) {
-                                const autoPrices = calculateAutoPrices(variation.price);
-                                displayPrice = channel === "Zomato" ? autoPrices.Zomato : autoPrices.Swiggy;
+                                const autoPrices = calculateAutoPrices(
+                                  variation.price,
+                                );
+                                displayPrice =
+                                  channel === "Zomato"
+                                    ? autoPrices.Zomato
+                                    : autoPrices.Swiggy;
                                 bgColor = "bg-blue-50";
                               }
 
@@ -802,9 +813,16 @@ export default function ItemDetail() {
                                 >
                                   <p className="text-xs text-gray-600 mb-1">
                                     {channel}
-                                    {isAutoCalculated && <span className="text-blue-600 font-semibold"> (auto)</span>}
+                                    {isAutoCalculated && (
+                                      <span className="text-blue-600 font-semibold">
+                                        {" "}
+                                        (auto)
+                                      </span>
+                                    )}
                                   </p>
-                                  <p className={`text-base font-bold ${isAutoCalculated ? "text-blue-700" : "text-gray-900"}`}>
+                                  <p
+                                    className={`text-base font-bold ${isAutoCalculated ? "text-blue-700" : "text-gray-900"}`}
+                                  >
                                     ₹{displayPrice}
                                   </p>
                                 </div>

@@ -12,13 +12,38 @@ interface SalesCardProps {
 }
 
 const typeColors = {
-  Zomato: { bg: "bg-red-50", border: "border-red-200", dot: "bg-red-500", text: "text-red-700" },
-  Swiggy: { bg: "bg-orange-50", border: "border-orange-200", dot: "bg-orange-500", text: "text-orange-700" },
-  Dining: { bg: "bg-blue-50", border: "border-blue-200", dot: "bg-blue-500", text: "text-blue-700" },
-  Parcel: { bg: "bg-green-50", border: "border-green-200", dot: "bg-green-500", text: "text-green-700" },
+  Zomato: {
+    bg: "bg-red-50",
+    border: "border-red-200",
+    dot: "bg-red-500",
+    text: "text-red-700",
+  },
+  Swiggy: {
+    bg: "bg-orange-50",
+    border: "border-orange-200",
+    dot: "bg-orange-500",
+    text: "text-orange-700",
+  },
+  Dining: {
+    bg: "bg-blue-50",
+    border: "border-blue-200",
+    dot: "bg-blue-500",
+    text: "text-blue-700",
+  },
+  Parcel: {
+    bg: "bg-green-50",
+    border: "border-green-200",
+    dot: "bg-green-500",
+    text: "text-green-700",
+  },
 };
 
-export function SalesCard({ type, totalQuantity = 0, totalValue = 0, variations = [] }: SalesCardProps) {
+export function SalesCard({
+  type,
+  totalQuantity = 0,
+  totalValue = 0,
+  variations = [],
+}: SalesCardProps) {
   const colors = typeColors[type];
 
   return (
@@ -32,12 +57,20 @@ export function SalesCard({ type, totalQuantity = 0, totalValue = 0, variations 
       {/* Main Stats */}
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div>
-          <p className="text-xs font-semibold text-gray-600 uppercase mb-1">Sale Quantity</p>
-          <p className={`text-2xl font-bold ${colors.text}`}>{(totalQuantity ?? 0).toLocaleString()}</p>
+          <p className="text-xs font-semibold text-gray-600 uppercase mb-1">
+            Sale Quantity
+          </p>
+          <p className={`text-2xl font-bold ${colors.text}`}>
+            {(totalQuantity ?? 0).toLocaleString()}
+          </p>
         </div>
         <div>
-          <p className="text-xs font-semibold text-gray-600 uppercase mb-1">Sale Value</p>
-          <p className={`text-2xl font-bold ${colors.text}`}>₹{(totalValue ?? 0).toLocaleString()}</p>
+          <p className="text-xs font-semibold text-gray-600 uppercase mb-1">
+            Sale Value
+          </p>
+          <p className={`text-2xl font-bold ${colors.text}`}>
+            ₹{(totalValue ?? 0).toLocaleString()}
+          </p>
         </div>
       </div>
 
@@ -47,13 +80,17 @@ export function SalesCard({ type, totalQuantity = 0, totalValue = 0, variations 
           {variations.map((variation, idx) => (
             <div key={idx}>
               <div className="flex justify-between items-center mb-1">
-                <p className="text-sm font-medium text-gray-800">{variation.name}</p>
+                <p className="text-sm font-medium text-gray-800">
+                  {variation.name}
+                </p>
                 <span className={`text-xs font-semibold ${colors.text}`}>
                   {variation.quantity} qty
                 </span>
               </div>
               <p className={`text-sm font-semibold ${colors.text}`}>
-                {variation.quantity > 0 && variation.value > 0 ? `₹${variation.value.toLocaleString()}` : "-"}
+                {variation.quantity > 0 && variation.value > 0
+                  ? `₹${variation.value.toLocaleString()}`
+                  : "-"}
               </p>
             </div>
           ))}
@@ -86,12 +123,19 @@ interface SalesSummaryCardsProps {
   };
 }
 
-export default function SalesSummaryCards({ zomatoData, swiggyData, diningData, parcelData }: SalesSummaryCardsProps) {
+export default function SalesSummaryCards({
+  zomatoData,
+  swiggyData,
+  diningData,
+  parcelData,
+}: SalesSummaryCardsProps) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="w-5 h-5 text-purple-600" />
-        <h2 className="text-xl font-bold text-gray-900">Sales Summary by Area</h2>
+        <h2 className="text-xl font-bold text-gray-900">
+          Sales Summary by Area
+        </h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <SalesCard type="Zomato" {...zomatoData} />

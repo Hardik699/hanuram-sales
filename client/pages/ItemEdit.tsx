@@ -169,7 +169,8 @@ export default function ItemEdit() {
                 value: v.value || "",
                 area: v.area || "",
                 channels: {
-                  ...(v.channels || CHANNELS.reduce((acc, ch) => ({ ...acc, [ch]: 0 }), {})),
+                  ...(v.channels ||
+                    CHANNELS.reduce((acc, ch) => ({ ...acc, [ch]: 0 }), {})),
                   // Override Zomato and Swiggy with auto-calculated prices
                   Zomato: autoPrices.Zomato,
                   Swiggy: autoPrices.Swiggy,
@@ -179,11 +180,12 @@ export default function ItemEdit() {
                 profitMargin: v.profitMargin || 0,
                 salesHistory: v.salesHistory || [],
               };
-            })
+            }),
           );
         }
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Failed to load item";
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to load item";
         console.error("Error loading item:", errorMessage);
         setError(errorMessage);
       } finally {
@@ -311,7 +313,7 @@ export default function ItemEdit() {
         }
 
         return updated;
-      })
+      }),
     );
   };
 
@@ -320,8 +322,8 @@ export default function ItemEdit() {
       variations.map((v) =>
         v.id === id
           ? { ...v, channels: { ...v.channels, [channel]: value } }
-          : v
-      )
+          : v,
+      ),
     );
   };
 
@@ -715,7 +717,9 @@ export default function ItemEdit() {
           {/* Variations Section */}
           <div className="border-t pt-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Variations</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Variations
+              </h3>
               <button
                 type="button"
                 onClick={addVariation}
@@ -794,7 +798,7 @@ export default function ItemEdit() {
                         updateVariation(
                           variation.id,
                           "price",
-                          parseFloat(e.target.value)
+                          parseFloat(e.target.value),
                         )
                       }
                       placeholder="0"
@@ -828,7 +832,7 @@ export default function ItemEdit() {
                         updateVariation(
                           variation.id,
                           "profitMargin",
-                          parseFloat(e.target.value)
+                          parseFloat(e.target.value),
                         )
                       }
                       step="0.01"
@@ -849,12 +853,19 @@ export default function ItemEdit() {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {CHANNELS.map((channel) => {
-                      const isAutoCalculated = ["Zomato", "Swiggy"].includes(channel);
+                      const isAutoCalculated = ["Zomato", "Swiggy"].includes(
+                        channel,
+                      );
                       return (
                         <div key={channel}>
                           <label className="text-xs text-gray-600 block mb-1">
                             {channel}
-                            {isAutoCalculated && <span className="text-blue-600 font-semibold"> (auto)</span>}
+                            {isAutoCalculated && (
+                              <span className="text-blue-600 font-semibold">
+                                {" "}
+                                (auto)
+                              </span>
+                            )}
                           </label>
                           <input
                             type="number"
@@ -863,14 +874,16 @@ export default function ItemEdit() {
                               updateChannelPrice(
                                 variation.id,
                                 channel,
-                                parseFloat(e.target.value)
+                                parseFloat(e.target.value),
                               )
                             }
                             placeholder="0"
                             step="0.01"
                             disabled={isAutoCalculated}
                             className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 ${
-                              isAutoCalculated ? "bg-blue-50 text-gray-500 cursor-not-allowed" : ""
+                              isAutoCalculated
+                                ? "bg-blue-50 text-gray-500 cursor-not-allowed"
+                                : ""
                             }`}
                           />
                         </div>
