@@ -263,7 +263,7 @@ export const handleGetItemSales: RequestHandler = async (req, res) => {
           return;
         }
 
-        const variationName = variation.name || `Variation ${idx + 1}`;
+        const variationName = variation.value || variation.name || `Variation ${idx + 1}`;
         console.log(
           `  Processing variation ${idx} (${variationName}): ${variation.salesHistory.length} records`,
         );
@@ -586,7 +586,7 @@ export const handleDebugItemSalesRaw: RequestHandler = async (req, res) => {
           return;
         }
 
-        const variationName = variation.name || `Variation ${idx + 1}`;
+        const variationName = variation.value || variation.name || `Variation ${idx + 1}`;
 
         variation.salesHistory.forEach((record: any) => {
           totalRecords++;
