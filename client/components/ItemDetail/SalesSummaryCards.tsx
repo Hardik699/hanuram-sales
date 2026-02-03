@@ -52,8 +52,8 @@ export function SalesCard({ type, totalQuantity = 0, totalValue = 0, variations 
                   {variation.quantity} qty
                 </span>
               </div>
-              <p className="text-sm text-gray-600">
-                {variation.quantity > 0 ? `₹${(variation.value / variation.quantity).toFixed(2)}/unit` : "-"}
+              <p className={`text-sm font-semibold ${colors.text}`}>
+                {variation.quantity > 0 && variation.value > 0 ? `₹${variation.value.toLocaleString()}` : "-"}
               </p>
             </div>
           ))}
