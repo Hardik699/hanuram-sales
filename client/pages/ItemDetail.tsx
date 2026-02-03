@@ -523,7 +523,10 @@ export default function ItemDetail() {
             <p className="text-gray-600">{item.description}</p>
           </div>
           <div className="flex gap-2">
-            <button className="p-2 hover:bg-blue-50 rounded-lg transition text-blue-600">
+            <button
+              onClick={() => navigate(`/items/${itemId}/edit`)}
+              className="p-2 hover:bg-blue-50 rounded-lg transition text-blue-600"
+            >
               <Edit className="w-5 h-5" />
             </button>
             <button
