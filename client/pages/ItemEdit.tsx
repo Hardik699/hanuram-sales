@@ -829,31 +829,43 @@ export default function ItemEdit() {
 
                 {/* Channel Prices */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Channel Prices
-                  </label>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Channel Prices
+                    </label>
+                    <p className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                      Zomato & Swiggy: auto +15% (rounded to 5)
+                    </p>
+                  </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {CHANNELS.map((channel) => (
-                      <div key={channel}>
-                        <label className="text-xs text-gray-600 block mb-1">
-                          {channel}
-                        </label>
-                        <input
-                          type="number"
-                          value={variation.channels[channel]}
-                          onChange={(e) =>
-                            updateChannelPrice(
-                              variation.id,
-                              channel,
-                              parseFloat(e.target.value)
-                            )
-                          }
-                          placeholder="0"
-                          step="0.01"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
-                        />
-                      </div>
-                    ))}
+                    {CHANNELS.map((channel) => {
+                      const isAutoCalculated = ["Zomato", "Swiggy"].includes(channel);
+                      return (
+                        <div key={channel}>
+                          <label className="text-xs text-gray-600 block mb-1">
+                            {channel}
+                            {isAutoCalculated && <span className="text-blue-600 font-semibold"> (auto)</span>}
+                          </label>
+                          <input
+                            type="number"
+                            value={variation.channels[channel]}
+                            onChange={(e) =>
+                              updateChannelPrice(
+                                variation.id,
+                                channel,
+                                parseFloat(e.target.value)
+                              )
+                            }
+                            placeholder="0"
+                            step="0.01"
+                            disabled={isAutoCalculated}
+                            className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 ${
+                              isAutoCalculated ? "bg-blue-50 text-gray-500 cursor-not-allowed" : ""
+                            }`}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
