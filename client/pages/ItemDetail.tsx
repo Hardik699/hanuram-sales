@@ -8,6 +8,24 @@ import SalesCharts from "@/components/ItemDetail/SalesCharts";
 
 console.log("📄 ItemDetail module loaded");
 
+// Helper function to calculate auto pricing
+const calculateAutoPrices = (basePrice: number) => {
+  if (basePrice <= 0) return { Zomato: 0, Swiggy: 0 };
+
+  // Add 15% markup
+  const priceWith15Percent = basePrice * 1.15;
+
+  // Round to nearest 5
+  const roundToNearest5 = (price: number) => {
+    return Math.round(price / 5) * 5;
+  };
+
+  const autoPriceZomato = roundToNearest5(priceWith15Percent);
+  const autoPriceSwiggy = roundToNearest5(priceWith15Percent);
+
+  return { Zomato: autoPriceZomato, Swiggy: autoPriceSwiggy };
+};
+
 export default function ItemDetail() {
   console.log("🎯 ItemDetail component rendering");
   const params = useParams<{ itemId: string }>();
@@ -17,7 +35,17 @@ export default function ItemDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"details" | "sales">("details");
-  const [dateRange, setDateRange] = useState({ start: "", end: "" });
+
+  // Initialize with default date range (last 365 days)
+  const getDefaultDateRange = () => {
+    const endDate = new Date().toISOString().split("T")[0];
+    const startDate = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
+    return { start: startDate, end: endDate };
+  };
+
+  const [dateRange, setDateRange] = useState(getDefaultDateRange());
   const [selectedRestaurant, setSelectedRestaurant] = useState<string>("");
   const [restaurants, setRestaurants] = useState<string[]>([]);
   const [restaurantsLoading, setRestaurantsLoading] = useState(false);
@@ -523,7 +551,10 @@ export default function ItemDetail() {
             <p className="text-gray-600">{item.description}</p>
           </div>
           <div className="flex gap-2">
-            <button className="p-2 hover:bg-blue-50 rounded-lg transition text-blue-600">
+            <button
+              onClick={() => navigate(`/items/${itemId}/edit`)}
+              className="p-2 hover:bg-blue-50 rounded-lg transition text-blue-600"
+            >
               <Edit className="w-5 h-5" />
             </button>
             <button
@@ -754,19 +785,49 @@ export default function ItemDetail() {
                             Channel Prices
                           </p>
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            {CHANNELS.map((channel) => (
-                              <div
-                                key={channel}
-                                className="bg-gray-50 rounded-lg p-3 text-center"
-                              >
-                                <p className="text-xs text-gray-600 mb-1">
-                                  {channel}
-                                </p>
-                                <p className="text-base font-bold text-gray-900">
-                                  ₹{variation.channels[channel] || "-"}
-                                </p>
-                              </div>
-                            ))}
+                            {CHANNELS.map((channel) => {
+                              const isAutoCalculated = [
+                                "Zomato",
+                                "Swiggy",
+                              ].includes(channel);
+                              let displayPrice =
+                                variation.channels[channel] || "-";
+                              let bgColor = "bg-gray-50";
+
+                              // Show auto-calculated prices for Zomato and Swiggy
+                              if (isAutoCalculated && variation.price) {
+                                const autoPrices = calculateAutoPrices(
+                                  variation.price,
+                                );
+                                displayPrice =
+                                  channel === "Zomato"
+                                    ? autoPrices.Zomato
+                                    : autoPrices.Swiggy;
+                                bgColor = "bg-blue-50";
+                              }
+
+                              return (
+                                <div
+                                  key={channel}
+                                  className={`${bgColor} rounded-lg p-3 text-center border ${isAutoCalculated ? "border-blue-200" : "border-transparent"}`}
+                                >
+                                  <p className="text-xs text-gray-600 mb-1">
+                                    {channel}
+                                    {isAutoCalculated && (
+                                      <span className="text-blue-600 font-semibold">
+                                        {" "}
+                                        (auto)
+                                      </span>
+                                    )}
+                                  </p>
+                                  <p
+                                    className={`text-base font-bold ${isAutoCalculated ? "text-blue-700" : "text-gray-900"}`}
+                                  >
+                                    ₹{displayPrice}
+                                  </p>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>

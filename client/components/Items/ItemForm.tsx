@@ -28,6 +28,24 @@ const VARIATION_VALUES = [
   "2 L",
 ];
 
+// Helper function to calculate auto pricing
+const calculateAutoPrices = (basePrice: number) => {
+  if (basePrice <= 0) return { Zomato: 0, Swiggy: 0 };
+
+  // Add 15% markup
+  const priceWith15Percent = basePrice * 1.15;
+
+  // Round to nearest 5
+  const roundToNearest5 = (price: number) => {
+    return Math.round(price / 5) * 5;
+  };
+
+  const autoPriceZomato = roundToNearest5(priceWith15Percent);
+  const autoPriceSwiggy = roundToNearest5(priceWith15Percent);
+
+  return { Zomato: autoPriceZomato, Swiggy: autoPriceSwiggy };
+};
+
 interface Variation {
   id: string;
   name: string;
@@ -195,7 +213,23 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
 
   const updateVariation = (id: string, field: string, value: any) => {
     setVariations(
-      variations.map((v) => (v.id === id ? { ...v, [field]: value } : v)),
+      variations.map((v) => {
+        if (v.id !== id) return v;
+
+        const updated = { ...v, [field]: value };
+
+        // Auto-calculate Zomato and Swiggy prices when base price changes
+        if (field === "price") {
+          const autoPrices = calculateAutoPrices(value);
+          updated.channels = {
+            ...updated.channels,
+            Zomato: autoPrices.Zomato,
+            Swiggy: autoPrices.Swiggy,
+          };
+        }
+
+        return updated;
+      }),
     );
   };
 
@@ -681,31 +715,52 @@ export default function ItemForm({ onSuccess, onClose }: ItemFormProps) {
 
               {/* Channel Prices */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Channel Prices
-                </label>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Channel Prices
+                  </label>
+                  <p className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                    Zomato & Swiggy: auto +15% (rounded to 5)
+                  </p>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {CHANNELS.map((channel) => (
-                    <div key={channel}>
-                      <label className="text-xs text-gray-600 block mb-1">
-                        {channel}
-                      </label>
-                      <input
-                        type="number"
-                        value={variation.channels[channel]}
-                        onChange={(e) =>
-                          updateChannelPrice(
-                            variation.id,
-                            channel,
-                            parseFloat(e.target.value),
-                          )
-                        }
-                        placeholder="0"
-                        step="0.01"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
-                      />
-                    </div>
-                  ))}
+                  {CHANNELS.map((channel) => {
+                    const isAutoCalculated = ["Zomato", "Swiggy"].includes(
+                      channel,
+                    );
+                    return (
+                      <div key={channel}>
+                        <label className="text-xs text-gray-600 block mb-1">
+                          {channel}
+                          {isAutoCalculated && (
+                            <span className="text-blue-600 font-semibold">
+                              {" "}
+                              (auto)
+                            </span>
+                          )}
+                        </label>
+                        <input
+                          type="number"
+                          value={variation.channels[channel]}
+                          onChange={(e) =>
+                            updateChannelPrice(
+                              variation.id,
+                              channel,
+                              parseFloat(e.target.value),
+                            )
+                          }
+                          placeholder="0"
+                          step="0.01"
+                          disabled={isAutoCalculated}
+                          className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 ${
+                            isAutoCalculated
+                              ? "bg-blue-50 text-gray-500 cursor-not-allowed"
+                              : ""
+                          }`}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

@@ -16,6 +16,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Items from "./pages/Items";
 import ItemDetail from "./pages/ItemDetail";
+import ItemEdit from "./pages/ItemEdit";
 import WhiteScreen from "./pages/WhiteScreen";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedLayout from "./components/ProtectedLayout";
@@ -47,6 +48,16 @@ const App = () => {
               }
             />
             {/* More specific routes must come BEFORE less specific ones */}
+            <Route
+              path="/items/:itemId/edit"
+              element={
+                <ProtectedRoute>
+                  <ProtectedLayout>
+                    <ItemEdit />
+                  </ProtectedLayout>
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/items/:itemId"
               element={
