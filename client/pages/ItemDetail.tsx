@@ -775,19 +775,33 @@ export default function ItemDetail() {
                             Channel Prices
                           </p>
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            {CHANNELS.map((channel) => (
-                              <div
-                                key={channel}
-                                className="bg-gray-50 rounded-lg p-3 text-center"
-                              >
-                                <p className="text-xs text-gray-600 mb-1">
-                                  {channel}
-                                </p>
-                                <p className="text-base font-bold text-gray-900">
-                                  ₹{variation.channels[channel] || "-"}
-                                </p>
-                              </div>
-                            ))}
+                            {CHANNELS.map((channel) => {
+                              const isAutoCalculated = ["Zomato", "Swiggy"].includes(channel);
+                              let displayPrice = variation.channels[channel] || "-";
+                              let bgColor = "bg-gray-50";
+
+                              // Show auto-calculated prices for Zomato and Swiggy
+                              if (isAutoCalculated && variation.price) {
+                                const autoPrices = calculateAutoPrices(variation.price);
+                                displayPrice = channel === "Zomato" ? autoPrices.Zomato : autoPrices.Swiggy;
+                                bgColor = "bg-blue-50";
+                              }
+
+                              return (
+                                <div
+                                  key={channel}
+                                  className={`${bgColor} rounded-lg p-3 text-center border ${isAutoCalculated ? "border-blue-200" : "border-transparent"}`}
+                                >
+                                  <p className="text-xs text-gray-600 mb-1">
+                                    {channel}
+                                    {isAutoCalculated && <span className="text-blue-600 font-semibold"> (auto)</span>}
+                                  </p>
+                                  <p className={`text-base font-bold ${isAutoCalculated ? "text-blue-700" : "text-gray-900"}`}>
+                                    ₹{displayPrice}
+                                  </p>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>
