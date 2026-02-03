@@ -156,20 +156,30 @@ export default function ItemEdit() {
           setImagePreviews(foundItem.images);
         }
 
-        // Load variations
+        // Load variations with auto-calculated prices
         if (foundItem.variations && Array.isArray(foundItem.variations)) {
           setVariations(
-            foundItem.variations.map((v: any) => ({
-              id: v.id || Date.now().toString(),
-              name: v.name || "",
-              value: v.value || "",
-              area: v.area || "",
-              channels: v.channels || CHANNELS.reduce((acc, ch) => ({ ...acc, [ch]: 0 }), {}),
-              price: v.price || 0,
-              sapCode: v.sapCode || "",
-              profitMargin: v.profitMargin || 0,
-              salesHistory: v.salesHistory || [],
-            }))
+            foundItem.variations.map((v: any) => {
+              const basePrice = v.price || 0;
+              const autoPrices = calculateAutoPrices(basePrice);
+
+              return {
+                id: v.id || Date.now().toString(),
+                name: v.name || "",
+                value: v.value || "",
+                area: v.area || "",
+                channels: {
+                  ...(v.channels || CHANNELS.reduce((acc, ch) => ({ ...acc, [ch]: 0 }), {})),
+                  // Override Zomato and Swiggy with auto-calculated prices
+                  Zomato: autoPrices.Zomato,
+                  Swiggy: autoPrices.Swiggy,
+                },
+                price: basePrice,
+                sapCode: v.sapCode || "",
+                profitMargin: v.profitMargin || 0,
+                salesHistory: v.salesHistory || [],
+              };
+            })
           );
         }
       } catch (err) {
