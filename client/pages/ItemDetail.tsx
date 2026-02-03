@@ -35,7 +35,15 @@ export default function ItemDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"details" | "sales">("details");
-  const [dateRange, setDateRange] = useState({ start: "", end: "" });
+
+  // Initialize with default date range (last 365 days)
+  const getDefaultDateRange = () => {
+    const endDate = new Date().toISOString().split('T')[0];
+    const startDate = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    return { start: startDate, end: endDate };
+  };
+
+  const [dateRange, setDateRange] = useState(getDefaultDateRange());
   const [selectedRestaurant, setSelectedRestaurant] = useState<string>("");
   const [restaurants, setRestaurants] = useState<string[]>([]);
   const [restaurantsLoading, setRestaurantsLoading] = useState(false);
