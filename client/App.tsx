@@ -16,6 +16,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Items from "./pages/Items";
 import ItemDetail from "./pages/ItemDetail";
+import ItemEdit from "./pages/ItemEdit";
 import WhiteScreen from "./pages/WhiteScreen";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedLayout from "./components/ProtectedLayout";
