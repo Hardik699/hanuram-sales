@@ -28,6 +28,24 @@ const VARIATION_VALUES = [
   "2 L",
 ];
 
+// Helper function to calculate auto pricing
+const calculateAutoPrices = (basePrice: number) => {
+  if (basePrice <= 0) return { Zomato: 0, Swiggy: 0 };
+
+  // Add 15% markup
+  const priceWith15Percent = basePrice * 1.15;
+
+  // Round to nearest 5
+  const roundToNearest5 = (price: number) => {
+    return Math.round(price / 5) * 5;
+  };
+
+  const autoPriceZomato = roundToNearest5(priceWith15Percent);
+  const autoPriceSwiggy = roundToNearest5(priceWith15Percent);
+
+  return { Zomato: autoPriceZomato, Swiggy: autoPriceSwiggy };
+};
+
 interface Variation {
   id: string;
   name: string;
